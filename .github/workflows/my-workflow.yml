@@ -1,0 +1,30 @@
+name: Check Milestone
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  check-milestone:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get PR milestone
+        id: get-milestone
+        run: |
+          MILESTONE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | \
+            jq .milestone.title -r)
+          echo "PR Milestone: $MILESTONE"
+          echo "::set-output name=milestone::$MILESTONE"
+
+      - name: Check milestone
+        run: |
+          ACCEPTABLE_MILESTONE="3.0.0" # これは例。実際のマイルストーン名に合わせて変更してください
+          if [[ "${{ steps.get-milestone.outputs.milestone }}" != "$ACCEPTABLE_MILESTONE" ]]; then
+            echo "This PR cannot be merged into develop because it does not match the acceptable milestone."
+            exit 1
+          fi
