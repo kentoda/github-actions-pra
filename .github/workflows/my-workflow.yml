@@ -1,9 +1,14 @@
 name: Check Milestone
 
-on:
+on: 
   pull_request:
     branches:
       - develop
+    types:
+      - opened
+      - synchronize
+      - edited
+      - reopened
 
 jobs:
   check-milestone:
@@ -23,7 +28,7 @@ jobs:
 
       - name: Check milestone
         run: |
-          ACCEPTABLE_MILESTONE="3.0.0" # これは例。実際のマイルストーン名に合わせて変更してください
+          ACCEPTABLE_MILESTONE="3.0.0"
           if [[ "${{ steps.get-milestone.outputs.milestone }}" != "$ACCEPTABLE_MILESTONE" ]]; then
             echo "This PR cannot be merged into develop because it does not match the acceptable milestone."
             exit 1
