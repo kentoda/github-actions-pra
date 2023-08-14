@@ -23,13 +23,15 @@ jobs:
           MILESTONE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | \
             jq .milestone.title -r)
-          echo "PR Milestone: $MILESTONE"
-          echo "::set-output name=milestone::$MILESTONE"
+          # メジャーとマイナーバージョンのみを取得
+          MAJOR_MINOR=$(echo "$MILESTONE" | cut -d. -f1,2)
+          echo "PR Major and Minor Version: $MAJOR_MINOR"
+          echo "::set-output name=major_minor::$MAJOR_MINOR"
 
       - name: Check milestone
         run: |
-          ACCEPTABLE_MILESTONE="3.0.0"
-          if [[ "${{ steps.get-milestone.outputs.milestone }}" != "$ACCEPTABLE_MILESTONE" ]]; then
+          ACCEPTABLE_MILESTONE="3.0"
+          if [[ "${{ steps.get-milestone.outputs.major_minor }}" != "$ACCEPTABLE_MILESTONE" ]]; then
             echo "This PR cannot be merged into develop because it does not match the acceptable milestone."
             exit 1
           fi
